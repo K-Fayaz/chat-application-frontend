@@ -1,8 +1,9 @@
-import { Avatar, Tooltip } from "@mui/material";
+import { Avatar, FormControlLabel, Tooltip } from "@mui/material";
 import FlutterDashIcon from '@mui/icons-material/FlutterDash';
 import { Link } from "react-router-dom";
 import MessageIcon from '@mui/icons-material/Message';
 import LogoutIcon from '@mui/icons-material/Logout';
+
 
 const NavBar = ()=>{
     return(
