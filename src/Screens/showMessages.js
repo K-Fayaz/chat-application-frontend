@@ -1,7 +1,13 @@
 import { Avatar } from "@mui/material";
+import InputAdornment from '@mui/material/InputAdornment';
 import { useParams } from "react-router-dom";
 import TextField from '@mui/material/TextField';
 import SendIcon from '@mui/icons-material/Send';
+import EmojiPicker from "emoji-picker-react";
+import MoodIcon from '@mui/icons-material/Mood';
+import InfoIcon from '@mui/icons-material/Info';
+import IconButton from "@mui/material/IconButton";
+import { useState } from "react";
 
 let seedData = [
     {
@@ -52,15 +58,21 @@ let seedData = [
 const ShowMessages = ()=>{
 
     let {id} = useParams();
+    let [showEmojiPicker,setShowEmojiPicker]=useState(false);
 
     return(
         <div className="w-full h-full">
-            <header className="w-full py-3 flex flex-row border-b">
-                <Avatar className="ml-5" src={require(`../Assets/${seedData[id].image}`)}/>
-                <div className="ml-2">
-                    <h1 className="text-sm font-bold">{seedData[id].username}</h1>
-                    <p className="text-xs text-green-500 mt">Online</p>
+            <header className="w-full py-3 flex flex-row justify-between border-b">
+                <div className="flex flex-row">
+                    <Avatar className="ml-5" src={require(`../Assets/${seedData[id].image}`)}/>
+                    <div className="ml-2">
+                        <h1 className="text-sm font-bold">{seedData[id].username}</h1>
+                        <p className="text-xs text-green-500 mt">Online</p>
+                    </div>
                 </div>
+                <IconButton>
+                    <InfoIcon className="mr-5 opacity-55"/>
+                </IconButton>
             </header>
             <div className="w-full h-full relative">
                 <div style={{height:'480px',overflow:'auto'}} className="w-full">
@@ -74,17 +86,25 @@ const ShowMessages = ()=>{
                     <p className="clear-both float-right mr-2 w-auto text-sm p-3 my-2 ml-2 bg-slate-200 max-w-[500px] rounded-s rounded-es" >Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
 
                 </div>
-                <div className="w-full flex justify-around">
-                    <TextField
-                        className="w-11/12"
-                        id="outlined-multiline-flexible"
-                        multiline
-                        maxRows={4}
-                        placeholder="Type Message"
-                        size="small"
-                    />
-                    <button><SendIcon className="text-[#4D47C3]"/></button>
+                <div className="w-full flex justify-around items-center relative">
+                    <div className="relative">
+                        <MoodIcon onClick={()=>setShowEmojiPicker(!showEmojiPicker)} className="cursor-pointer text-orange-600" />
+                    </div>
+                    <form className="w-11/12 flex flex-row justify-around">
+                        <TextField
+                            className="w-11/12"
+                            id="outlined-multiline-flexible"
+                            // multiline
+                            maxRows={4}
+                            placeholder="Type Message"
+                            size="small"
+                        />
+                        <button><SendIcon className="text-[#4D47C3]"/></button>
+                    </form>
                 </div>
+                {
+                    showEmojiPicker && <EmojiPicker className="absolute top-[-500px] left-[10px]"/>
+                }
             </div>
         </div>
     )
