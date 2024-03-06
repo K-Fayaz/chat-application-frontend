@@ -62,17 +62,12 @@ const ShowMessages = ()=>{
 
     return(
         <div className="w-full h-full">
-            <header className="w-full py-3 flex flex-row justify-between border-b">
-                <div className="flex flex-row">
-                    <Avatar className="ml-5" src={require(`../Assets/${seedData[id].image}`)}/>
-                    <div className="ml-2">
-                        <h1 className="text-sm font-bold">{seedData[id].username}</h1>
-                        <p className="text-xs text-green-500 mt">Online</p>
-                    </div>
+            <header className="w-full py-3 flex flex-row border-b">
+                <Avatar className="ml-5" src={require(`../Assets/${seedData[id].image}`)}/>
+                <div className="ml-2">
+                    <h1 className="text-sm font-bold">{seedData[id].username}</h1>
+                    <p className="text-xs text-green-500 mt">Online</p>
                 </div>
-                <IconButton>
-                    <InfoIcon className="mr-5 opacity-55"/>
-                </IconButton>
             </header>
             <div className="w-full h-full relative">
                 <div style={{height:'480px',overflow:'auto'}} className="w-full">
