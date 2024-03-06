@@ -7,6 +7,7 @@ import Login from './Components/Login';
 import Register from './Components/Register';
 import Messages from './Screens/Messages';
 import ShowMessages from './Screens/showMessages';
+import ChooseAvatar from './Screens/ChooseAvatar';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -20,6 +21,7 @@ root.render(
           <Route path='messages' element={<Messages/>}>
               <Route path=':id' element={<ShowMessages/>} />
           </Route>
+          <Route path='/avatar' element={<ChooseAvatar/>}/>
       </Routes>
     </Router>
   </React.StrictMode>
