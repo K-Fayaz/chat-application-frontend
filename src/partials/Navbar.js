@@ -3,9 +3,35 @@ import FlutterDashIcon from '@mui/icons-material/FlutterDash';
 import { Link } from "react-router-dom";
 import MessageIcon from '@mui/icons-material/Message';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { BASE_URL } from "../constants";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 
 const NavBar = ()=>{
+
+    const navigate = useNavigate();
+
+    const handleLogout = async()=>{
+        try{
+            let url = `${BASE_URL}/user/auth/logout`;
+            
+            let response = await axios({
+                method:"POST",
+                url,
+                withCredentials: true
+            });
+
+            console.log("Successfully logged out...",response);
+            sessionStorage.setItem('user','');
+            sessionStorage.setItem('token','');
+            navigate('/auth/login')
+        }
+        catch(err){ 
+            console.log("Something went bad while logout...",err);
+        }
+    }
+
     return(
         <>
             <nav className="h-screen bg-white w-[50px] border-r rounded-lg">
@@ -30,9 +56,9 @@ const NavBar = ()=>{
                                 </Link>
                             </Tooltip>
                         </div>
-                        <Tooltip title="logout" arrow placement="right">
+                        <Tooltip className="cursor-pointer" title="logout" arrow placement="right">
                             <Avatar sx={{bgcolor:'#A0ABBC'}}>
-                                <LogoutIcon/>
+                                <LogoutIcon onClick={handleLogout}/>
                             </Avatar>
                         </Tooltip>
                     </div>

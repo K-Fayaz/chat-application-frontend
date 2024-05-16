@@ -11,7 +11,12 @@ import FormGroup from '@mui/material/FormGroup';
 import {FormControlLabel} from "@mui/material";
 import "../CSS/customScroll.css";
 import { Outlet, useNavigate } from "react-router-dom";
-
+import { useEffect, useState } from "react";
+import {BASE_URL} from "../constants";
+import axios, { all } from "axios";
+import { useSelector , useDispatch } from "react-redux";
+import { setAllUsers,setCurrentUser } from "../Features/userDetails";
+import socket from "../Utils/socket";
 
 let seedData = [
     {
@@ -59,8 +64,58 @@ let seedData = [
 ]
 
 const Messages = ()=>{
-
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const [users,setUsers] = useState([]);
+    const [searchText,setSearchText] = useState('');
+
+    let allUsers = useSelector((state)=> state.userDetails.allUsers);
+
+
+    useEffect(()=>{
+        let url = `${BASE_URL}/user/fetch/all`;
+
+        axios({
+            method:"GET",
+            url: url,
+            headers:{
+                'Content-Type':'application/json'
+            },
+            withCredentials: true
+        })
+        .then((response)=>{
+            console.log(response.data.content);
+            setUsers(response.data.content.data)
+            dispatch(setAllUsers(response.data.content.data));
+        })
+        .catch(err => console.log(err));
+
+    },[]);
+
+    socket.connect();
+
+
+    const handleSearchInput = (e)=>{
+        setSearchText(e.target.value);
+        if(e.target.value.length === 0) {
+            setUsers(allUsers);
+            return;
+        }
+
+        let newSet = users.filter(item=>{
+            return item.username.toLowerCase().includes(e.target.value.toLowerCase());
+        });
+
+        newSet.length ? setUsers(newSet) : setUsers(allUsers);
+    }
+
+
+    const handleNavigate = (id)=>{
+        setUsers(allUsers);
+        setSearchText('');
+        navigate(`/${id}`);
+    }
 
     return(
         <>
@@ -91,6 +146,8 @@ const Messages = ()=>{
                                     className="w-11/12"
                                     size="small"
                                     id="input-with-icon-textfield"
+                                    value={searchText}
+                                    onChange={handleSearchInput}
                                     InputProps={{
                                     startAdornment: (
                                         <InputAdornment  className="text-sm font-bold" position="start">
@@ -102,25 +159,25 @@ const Messages = ()=>{
                                 />
                             </div>
                             {
-                                seedData.map((item,index)=>(
-                                    <div key={index} onClick={()=> navigate(`/messages/${index}`) } className="flex flex-row py-3 px-2 border-b z-0 cursor-pointer">
-                                        <Avatar className="" src={require('../Assets/' + item.image)}/>
+                                users.map((item,index)=>(
+                                    <div key={item._id} onClick={()=> handleNavigate(item._id) } className="flex flex-row py-3 px-2 border-b z-0 cursor-pointer">
+                                        <Avatar className="" src={require('../Assets/'+item.avatar+'.png')}/>
                                         <div className="w-full">
                                             <div className="flex flex-row justify-between">
                                                 <div className="ml-2">
                                                     <h1 className="text-sm font-bold">{item.username}</h1>
-                                                    <p className="text-slate-400 text-xs">{item.time}</p>
+                                                    <p className="text-slate-400 text-xs">11:40 am</p>
                                                 </div>
                                                 {
                                                     item.badgeContent > 0
                                                     && 
-                                                    <Badge size="small" max={10} className="mr-4" badgeContent={item.badgeContent} color="primary">
+                                                    <Badge size="small" max={10} className="mr-4" badgeContent={5} color="primary">
                                                         <MailIcon/>
                                                     </Badge>
                                                 }
                                             </div>
                                             <div className="text-xs text-500 ml-2 mt-2">
-                                                {item.message}
+                                            Oh,there is such a bunch of email, I cant find yours among...
                                             </div>
                                         </div>
                                     </div>

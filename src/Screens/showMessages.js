@@ -1,13 +1,18 @@
+import React from "react";
 import { Avatar } from "@mui/material";
-import InputAdornment from '@mui/material/InputAdornment';
 import { useParams } from "react-router-dom";
 import TextField from '@mui/material/TextField';
 import SendIcon from '@mui/icons-material/Send';
 import EmojiPicker from "emoji-picker-react";
 import MoodIcon from '@mui/icons-material/Mood';
-import InfoIcon from '@mui/icons-material/Info';
-import IconButton from "@mui/material/IconButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BASE_URL } from "../constants";
+import axios from "axios";
+import BasicMenu from "../Components/BasicMenu";
+import { useSelector , useDispatch } from "react-redux";
+import { setCurrentUser } from "../Features/userDetails";
+import socket from "../Utils/socket";
+
 
 let seedData = [
     {
@@ -58,49 +63,121 @@ let seedData = [
 const ShowMessages = ()=>{
 
     let {id} = useParams();
+    let dispatch = useDispatch();
+
+    const [user,setUser] = useState(null);
     let [showEmojiPicker,setShowEmojiPicker]=useState(false);
+    let [inputText,setInputText] = useState("");
+    
+    let reciever = useSelector((state)=> state.userDetails.currentUser);
+    
+
+    useEffect(()=>{
+
+        dispatch(setCurrentUser(id));
+        
+        let url = `${BASE_URL}/user/fetch?id=${id}`;
+        axios.get(url,{
+            
+        })
+            .then((response)=>{
+                console.log(response.data.content.data);
+                setUser(response.data.content.data);
+            })
+            .catch(err=> console.log(err));
+
+    },[id]);  
+
+    
+    const handleMessageSend = (event)=>{
+        event.preventDefault();
+        let formData = new FormData(event.target);
+        
+        let body = {};
+        for(let [key,value] of formData.entries()){
+            body[key] = value;
+        }
+
+        body['reciever'] = reciever;
+
+        console.log("Body  is ",JSON.stringify(body));
+
+        socket.emit("send",JSON.stringify(body));
+
+        setInputText("");
+
+    }
+
+    socket.on('recieve',(response)=>{
+        console.log("Message has been recieved : ",response);
+    })
 
     return(
         <div className="w-full h-full">
-            <header className="w-full py-3 flex flex-row border-b">
-                <Avatar className="ml-5" src={require(`../Assets/${seedData[id].image}`)}/>
-                <div className="ml-2">
-                    <h1 className="text-sm font-bold">{seedData[id].username}</h1>
-                    <p className="text-xs text-green-500 mt">Online</p>
-                </div>
-            </header>
-            <div className="w-full h-full relative">
-                <div style={{height:'480px',overflow:'auto'}} className="w-full">
-                    <p className="clear-both w-auto text-sm bg-[#4D47C3] p-3 my-2 ml-2 text-white max-w-[500px] rounded-ss rounded-e" >Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
-                    <p className="clear-both float-right mr-2 w-auto text-sm p-3 my-2 ml-2 bg-slate-200 max-w-[500px] rounded-s rounded-es" >Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
-                    <p className="clear-both w-auto text-sm bg-[#4D47C3] p-3 my-2 ml-2 text-white max-w-[500px] rounded-ss rounded-e" >Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
-                    <p className="clear-both float-right mr-2 w-auto text-sm p-3 my-2 ml-2 bg-slate-200 max-w-[500px] rounded-s rounded-es" >Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
-                    <p className="clear-both w-auto text-sm bg-[#4D47C3] p-3 my-2 ml-2 text-white max-w-[500px] rounded-ss rounded-e" >Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
-                    <p className="clear-both float-right mr-2 w-auto text-sm p-3 my-2 ml-2 bg-slate-200 max-w-[500px] rounded-s rounded-es" >Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
-                    <p className="clear-both w-auto text-sm bg-[#4D47C3] p-3 my-2 ml-2 text-white max-w-[500px] rounded-ss rounded-e" >Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
-                    <p className="clear-both float-right mr-2 w-auto text-sm p-3 my-2 ml-2 bg-slate-200 max-w-[500px] rounded-s rounded-es" >Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
-
-                </div>
-                <div className="w-full flex justify-around items-center relative">
-                    <div className="relative">
-                        <MoodIcon onClick={()=>setShowEmojiPicker(!showEmojiPicker)} className="cursor-pointer text-orange-600" />
+            {
+               user && <React.Fragment>
+                    <header className="w-full py-3 flex flex-row border-b">
+                        <Avatar className="ml-5" src={require(`../Assets/${user.avatar}.png`)}/>
+                        <div className="ml-2">
+                            <h1 className="text-sm font-bold">{user.username}</h1>
+                            <p className="text-xs text-green-500 mt">Online</p>
+                        </div>
+                    </header>
+                    <div className="w-full h-full relative">
+                        <div style={{height:'480px',overflow:'auto'}} className="w-full">
+                            <div className="clear-both w-auto text-sm bg-[#4D47C3] p-3 my-2 ml-2 text-white max-w-[500px] rounded-ss rounded-e">
+                                <p>Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
+                            </div>
+                            <div className="relative clear-both float-right mr-2 w-auto text-sm p-3 my-2 ml-2 bg-slate-200 max-w-[500px] rounded-s rounded-es">
+                                <p>Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
+                                <BasicMenu/>
+                            </div>
+                            <div className="clear-both w-auto text-sm bg-[#4D47C3] p-3 my-2 ml-2 text-white max-w-[500px] rounded-ss rounded-e">
+                                <p>Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
+                            </div>
+                            <div className="relative clear-both float-right mr-2 w-auto text-sm p-3 my-2 ml-2 bg-slate-200 max-w-[500px] rounded-s rounded-es">
+                                <p>Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
+                                <BasicMenu/>
+                            </div>
+                            <div className="clear-both w-auto text-sm bg-[#4D47C3] p-3 my-2 ml-2 text-white max-w-[500px] rounded-ss rounded-e">
+                                <p>Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
+                            </div>
+                            <div className="relative clear-both float-right mr-2 w-auto text-sm p-3 my-2 ml-2 bg-slate-200 max-w-[500px] rounded-s rounded-es">
+                                <p>Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
+                                <BasicMenu/>
+                            </div><div className="clear-both w-auto text-sm bg-[#4D47C3] p-3 my-2 ml-2 text-white max-w-[500px] rounded-ss rounded-e">
+                                <p>Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
+                            </div>
+                            <div className="relative clear-both float-right mr-2 w-auto text-sm p-3 my-2 ml-2 bg-slate-200 max-w-[500px] rounded-s rounded-es">
+                                <p>Have you already prepared finanacial statement for the last month ?I can't find it anywhere...</p>
+                                <BasicMenu/>
+                            </div>
+                        </div>
+                        <div className="w-full flex justify-around items-center relative mt">
+                            <div className="relative">
+                                <MoodIcon onClick={()=>setShowEmojiPicker(!showEmojiPicker)} className="cursor-pointer text-orange-600" />
+                            </div>
+                            <form onSubmit={handleMessageSend} className="w-11/12 flex flex-row justify-around">
+                                <TextField
+                                    className="w-11/12"
+                                    id="outlined-multiline-flexible"
+                                    maxRows={4}
+                                    placeholder="Type Message"
+                                    size="small"
+                                    name="message"
+                                    value={inputText}
+                                    onChange={(e)=> setInputText(e.target.value)}
+                                    autoComplete="off"
+                                />
+                                <button><SendIcon className="text-[#4D47C3]"/></button>
+                            </form>
+                        </div>
+                        {
+                            showEmojiPicker && <EmojiPicker className="absolute top-[-500px] left-[10px]"/>
+                        }
                     </div>
-                    <form className="w-11/12 flex flex-row justify-around">
-                        <TextField
-                            className="w-11/12"
-                            id="outlined-multiline-flexible"
-                            // multiline
-                            maxRows={4}
-                            placeholder="Type Message"
-                            size="small"
-                        />
-                        <button><SendIcon className="text-[#4D47C3]"/></button>
-                    </form>
-                </div>
-                {
-                    showEmojiPicker && <EmojiPicker className="absolute top-[-500px] left-[10px]"/>
-                }
-            </div>
+                </React.Fragment>
+            }
         </div>
     )
 };
