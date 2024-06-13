@@ -17,6 +17,8 @@ import axios, { all } from "axios";
 import { useSelector , useDispatch } from "react-redux";
 import { setAllUsers,setCurrentUser } from "../Features/userDetails";
 import socket from "../Utils/socket";
+import ReactTimeAgo from 'react-time-ago'
+
 
 let seedData = [
     {
@@ -69,23 +71,26 @@ const Messages = ()=>{
 
     const [users,setUsers] = useState([]);
     const [searchText,setSearchText] = useState('');
+    var [loggedinUser,setLoggedinUser] = useState(null);
 
     let allUsers = useSelector((state)=> state.userDetails.allUsers);
 
-
     useEffect(()=>{
         let url = `${BASE_URL}/user/fetch/all`;
+
+        console.log("Token is ",sessionStorage.getItem('token'));
 
         axios({
             method:"GET",
             url: url,
             headers:{
-                'Content-Type':'application/json'
+                'Content-Type':'application/json',
+                'bearer_token': sessionStorage.getItem('token')
             },
             withCredentials: true
         })
         .then((response)=>{
-            console.log(response.data.content);
+            // console.log("Data from backend isS ",response.data.content);
             setUsers(response.data.content.data)
             dispatch(setAllUsers(response.data.content.data));
         })
@@ -94,6 +99,28 @@ const Messages = ()=>{
     },[]);
 
     socket.connect();
+
+    useEffect(()=>{
+        let url = `${BASE_URL}/user/fetch/me`;
+
+        if(!sessionStorage.getItem('token') || !sessionStorage.length) navigate('/auth/login');
+        
+        axios.get(url,{
+            method:"GET",
+            headers:{
+                'Content-Type':'application/json',
+                 bearer_token: sessionStorage.getItem('token'),
+            }
+        })
+        .then((response)=>{
+            console.log("Response avatar is :",response.data.content.data);
+            // setUser(response.data.content.data.avatar);
+            setLoggedinUser(response.data.content.data)
+        })
+        .catch((err)=>{
+            console.log("Error has occured!!",err);
+        })
+    },[]);
 
 
     const handleSearchInput = (e)=>{
@@ -114,6 +141,7 @@ const Messages = ()=>{
     const handleNavigate = (id)=>{
         setUsers(allUsers);
         setSearchText('');
+        sessionStorage.setItem('chatting_user',id);
         navigate(`/${id}`);
     }
 
@@ -128,15 +156,13 @@ const Messages = ()=>{
                             <h1 className="ml-1 text-lg font-bold">Messages</h1>
                         </div>
                         <div className="flex flex-row justify-around items-center">
-                            <FormGroup>
-                                <FormControlLabel 
-                                    control={<MaterialUISwitch sx={{ m: 1 }} defaultChecked />}
-                                />
-                            </FormGroup>
-                            <Avatar
-                                className="mr-10"
-                                src={require("../Assets/chewing-gum.png")}
-                            ></Avatar>
+                            <Avatar className="mr-10" 
+                            src={
+                                sessionStorage.getItem('token') ? require('../Assets/'+sessionStorage.getItem('avatar')+'.png')
+                                                                : require("../Assets/batman.png")
+                            }
+                        />
+
                         </div>
                     </header>
                     <div style={{height:'92vh',overflow:'hidden'}} className="w-full flex flex-row">
@@ -166,7 +192,14 @@ const Messages = ()=>{
                                             <div className="flex flex-row justify-between">
                                                 <div className="ml-2">
                                                     <h1 className="text-sm font-bold">{item.username}</h1>
-                                                    <p className="text-slate-400 text-xs">11:40 am</p>
+                                                    <p className="text-slate-400 text-xs">
+                                                        { item.last_message !== null ? new Date(item.last_message.time).toLocaleTimeString('en-GB', {
+                                                                                        hour: '2-digit',
+                                                                                        minute: '2-digit',
+                                                                                        // second: null,
+                                                                                        hour12: true })
+                                                                                     : "⌚" }
+                                                    </p>
                                                 </div>
                                                 {
                                                     item.badgeContent > 0
@@ -177,7 +210,7 @@ const Messages = ()=>{
                                                 }
                                             </div>
                                             <div className="text-xs text-500 ml-2 mt-2">
-                                            Oh,there is such a bunch of email, I cant find yours among...
+                                                { item.last_message !== null ? item.last_message.message : "Send your first message..." }
                                             </div>
                                         </div>
                                     </div>

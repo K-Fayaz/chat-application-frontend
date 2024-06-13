@@ -36,6 +36,7 @@ const Login = ()=>{
             
             console.log(response.data.content);
             sessionStorage.setItem('user',response.data.content.data.id);
+            sessionStorage.setItem("avatar",response.data.content.data.avatar);
             sessionStorage.setItem('token',response.data.content.meta.access_token);
             // navigate("/");
             window.location.href = '/';

@@ -108,6 +108,9 @@ const ChooseAvatar = ()=>{
             });
 
             console.log(response.data);
+            if(response.data.status === true){
+                sessionStorage.setItem("avatar",response.data.content.avatar);
+            }
             navigate("/");
         }   
         catch(err){

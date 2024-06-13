@@ -6,11 +6,17 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { BASE_URL } from "../constants";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useEffect,useState } from "react";
+import { useDispatch } from "react-redux";
+import { setLoggedinUser } from "../Features/userDetails";
 
 
 const NavBar = ()=>{
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const [user,setUser] = useState(null)
 
     const handleLogout = async()=>{
         try{
@@ -32,6 +38,30 @@ const NavBar = ()=>{
         }
     }
 
+    useEffect(()=>{
+
+        let url = `${BASE_URL}/user/fetch/me`;
+
+        if(sessionStorage.getItem('token') == null || sessionStorage.length == 0) navigate('/auth/login');
+        
+        axios.get(url,{
+            method:"GET",
+            headers:{
+                'Content-Type':'application/json',
+                 bearer_token: sessionStorage.getItem('token'),
+            }
+        })
+        .then((response)=>{
+            console.log("Response avatar is :",response.data.content.data);
+            setUser(response.data.content.data.avatar);
+            dispatch(setLoggedinUser(response.data.content.data));
+        })
+        .catch((err)=>{
+            console.log("Error has occured!!",err);
+        })
+
+    },[]);
+
     return(
         <>
             <nav className="h-screen bg-white w-[50px] border-r rounded-lg">
@@ -50,7 +80,11 @@ const NavBar = ()=>{
                             <Tooltip title="profile" arrow placement="right">
                                 <Link to='/profile'>
                                     <Avatar
-                                        src={require("../Assets/chewing-gum.png")}
+
+                                        src={
+                                            sessionStorage.getItem('token') ? require('../Assets/'+sessionStorage.getItem('avatar')+'.png')
+                                                                            : require("../Assets/batman.png")
+                                        }
                                         alt="Cheing Gum"
                                     ></Avatar>
                                 </Link>
