@@ -83,6 +83,7 @@ const ShowMessages = ()=>{
     const [editText,setEditText] = useState("");
     const [editTextId,setId] = useState(null);
     const chatEndRef = useRef(null);
+    const inputRef = useRef(null);
     
     let reciever = useSelector((state)=> state.userDetails.currentUser);
     // let reduxMessages = useSelector((state)=> state.messages.messages);
@@ -158,6 +159,7 @@ const ShowMessages = ()=>{
 
     const handleEmojiClick = (emoji)=>{
         let text = `${inputText}${emoji.emoji}`;
+        console.log("Value of Input is :", inputRef.current.value)
         setInputText(text);
     }
 
@@ -290,6 +292,7 @@ const ShowMessages = ()=>{
                                     value={inputText}
                                     onChange={(e)=> setInputText(e.target.value)}
                                     autoComplete="off"
+                                    ref={inputRef}
                                 />
                                 <button><SendIcon className="text-[#4D47C3]"/></button>
                             </form>

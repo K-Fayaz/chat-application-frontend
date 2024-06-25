@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect,useState } from "react";
 import { useDispatch } from "react-redux";
 import { setLoggedinUser } from "../Features/userDetails";
+import socket from "../Utils/socket";
 
 
 const NavBar = ()=>{
@@ -22,15 +23,23 @@ const NavBar = ()=>{
         try{
             let url = `${BASE_URL}/user/auth/logout`;
             
-            let response = await axios({
-                method:"POST",
-                url,
-                withCredentials: true
-            });
+            // let response = await axios({
+            //     method:"POST",
+            //     url,
+            //     headers:{
+            //         token: sessionStorage.getItem('token')
+            //     },
+            //     // withCredentials: true
+            // });
 
-            console.log("Successfully logged out...",response);
-            sessionStorage.setItem('user','');
-            sessionStorage.setItem('token','');
+            // console.log("Successfully logged out...",response);
+            // sessionStorage.setItem('user','');
+            sessionStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('avatar');
+            sessionStorage.removeItem('chatting_user');
+            socket.disconnect();
+            // sessionStorage.setItem('token','');
             navigate('/auth/login')
         }
         catch(err){ 

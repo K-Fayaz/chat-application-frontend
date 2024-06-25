@@ -4,6 +4,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import { Button } from '@mui/material';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 let avatars = [
     {
@@ -87,6 +88,13 @@ const ChooseAvatar = ()=>{
         currentIndex !== index ? setCurrentIndex(index) : setCurrentIndex(null);
     }
 
+    useEffect(()=>{
+        if(!sessionStorage.length || !sessionStorage.getItem('token')){
+            navigate('/auth/login');
+            return;
+        }
+    },[]);
+
     const handleAvatarSelect = async()=>{
         console.log("Selected Avatar is",avatars[currentIndex].img.split(".")[0]);
 
@@ -103,13 +111,15 @@ const ChooseAvatar = ()=>{
                 data: payload,
                 headers:{
                     'Content-Type':'application/json',
+                    bearer_token: sessionStorage?.getItem('token')
                 },
-                withCredentials: true,
+                // withCredentials: true,
             });
 
             console.log(response.data);
             if(response.data.status === true){
-                sessionStorage.setItem("avatar",response.data.content.avatar);
+                sessionStorage.setItem("avatar",response.data.content.data.avatar);
+                sessionStorage.setItem('user',response.data.content.data.user);
             }
             navigate("/");
         }   

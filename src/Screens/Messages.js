@@ -87,7 +87,7 @@ const Messages = ()=>{
                 'Content-Type':'application/json',
                 'bearer_token': sessionStorage.getItem('token')
             },
-            withCredentials: true
+            // withCredentials: true
         })
         .then((response)=>{
             // console.log("Data from backend isS ",response.data.content);

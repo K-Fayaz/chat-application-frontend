@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import { Button } from '@mui/material';
 import { Link , useNavigate } from "react-router-dom";
@@ -6,9 +7,14 @@ import AnimationWrapper from "../partials/AnimationWrapper";
 import axios from "axios";
 import { BASE_URL } from '../constants';
 
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+
 const Register = ()=>{
 
     const navigate = useNavigate();
+    const [open, setOpen] = useState(false);
+    const [errors,setErrors] = useState([]);
 
     const handleSubmit = async(e)=>{
         e.preventDefault();
@@ -32,7 +38,7 @@ const Register = ()=>{
                 headers:{
                     'Content-Type':'application/json',
                 },
-                withCredentials: true            
+                // withCredentials: true            
             });
             
             console.log(response.data.content);
@@ -41,8 +47,26 @@ const Register = ()=>{
             navigate("/avatar");
         }
         catch(err){
-            console.log(err.response.message);
+            console.log(err.response.data.message);
+            if(err.response.data.status === false){
+                setOpen(true);
+
+                setTimeout(()=>{
+                    setOpen(false);
+                    setErrors([]);
+                },[6000])
+
+                setErrors(err.response.data.errors);
+            }
         }
+    }
+
+    const handleClick = ()=>{
+        setOpen(true);
+    }
+
+    const handleClose = ()=>{
+        setOpen(false);
     }
 
     return(
@@ -65,6 +89,22 @@ const Register = ()=>{
                         </form>
                         <p className='mt-5'>Already have an account ? <Link style={{color: '#4D47C3'}} to='/auth/login'>Login here!</Link> </p>
                     </div>
+                    <div className=''>
+                                {
+                                    errors.map((item,index)=>(
+                                        <Snackbar key={index} open={open} autoHideDuration={6000}>
+                                            <Alert
+                                                // onClose={handleClose}
+                                                severity="error"
+                                                variant="filled"
+                                                sx={{ width: '100%' }}
+                                            >
+                                                { item.message }
+                                            </Alert>
+                                        </Snackbar>
+                                    ))
+                                }
+                            </div>
                 </AnimationWrapper>
             </div>
         </>
